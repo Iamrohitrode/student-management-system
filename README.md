@@ -25,16 +25,10 @@ A sleek and modern student dashboard designed to manage academic life efficientl
 
 ---
 
-## 📸 Preview
-
-(Add screenshots here later)
-
----
-
 ## 🌐 Live Demo
 
-(Add your GitHub Pages link here)
+https://iamrohitrode.github.io/student-management-system/
 
 ---
 
-## 📂 Project Structure
+
