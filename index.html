@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnX | Smart Student Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #05070a; color: #e2e8f0; }
+        .glass { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .sidebar-link.active { background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%); color: #60a5fa; border-left: 4px solid #3b82f6; }
+        .subject-pill { 
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(30, 58, 138, 0.2) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+        .logo-box {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div id="auth-screen" class="flex items-center justify-center min-h-screen p-6">
+        <div class="glass p-10 rounded-[2.5rem] w-full max-w-xl shadow-2xl">
+            <div id="login-box" class="text-center">
+                <div class="logo-box w-16 h-16 mx-auto mb-6"><i data-lucide="zap" class="text-white w-8 h-8"></i></div>
+                <h2 class="text-4xl font-black text-white tracking-tighter mb-8">LearnX</h2>
+                <form onsubmit="handleLogin(event)" class="space-y-4 max-w-sm mx-auto">
+                    <input type="email" id="log-email" placeholder="Email" required class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white focus:border-blue-500">
+                    <input type="password" id="log-pass" placeholder="Password" required class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white focus:border-blue-500">
+                    <button class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-bold text-white transition-all shadow-lg shadow-blue-600/20">Sign In</button>
+                </form>
+                <button onclick="toggleAuth(false)" class="mt-6 text-sm text-blue-400">New Student? Create Profile</button>
+            </div>
+            
+            <div id="reg-box" class="hidden">
+                <h3 class="text-2xl font-bold mb-6 text-white text-center">Student Registration</h3>
+                <form onsubmit="handleRegister(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="reg-name" placeholder="Full Name" required class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-white">
+                    <input type="email" id="reg-email" placeholder="Email" required class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-white">
+                    <input type="date" id="reg-dob" required class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-white">
+                    <input type="text" id="reg-mobile" placeholder="Mobile Number" required class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-white">
+                    <input type="text" id="reg-course" placeholder="Course Name" required class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-white">
+                    <input type="text" id="reg-college" placeholder="College Name" required class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-white">
+                    <input type="number" id="reg-year" placeholder="Academic Year" required class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-white">
+                    <input type="number" id="reg-passyear" placeholder="Passing Year" required class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-white">
+                    <input type="password" id="reg-pass" placeholder="Set Password" required class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-white col-span-full">
+                    <button class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-white col-span-full mt-2">Initialize Account</button>
+                </form>
+                <button onclick="toggleAuth(true)" class="w-full mt-4 text-sm text-slate-500 text-center">Already have an account? Login</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden flex h-screen overflow-hidden">
+        <aside class="w-64 glass m-4 mr-0 rounded-[2rem] flex flex-col p-6">
+            <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="logo-box w-10 h-10"><i data-lucide="zap" class="text-white w-5 h-5"></i></div>
+                <span class="text-2xl font-black text-white tracking-tighter">LearnX</span>
+            </div>
+            <nav class="space-y-3 flex-1">
+                <button onclick="navigate('dash')" id="nav-dash" class="sidebar-link w-full flex items-center gap-4 p-4 rounded-2xl transition"><i data-lucide="home" class="w-5 h-5"></i> Dashboard</button>
+                <button onclick="navigate('time')" id="nav-time" class="sidebar-link w-full flex items-center gap-4 p-4 rounded-2xl transition"><i data-lucide="calendar" class="w-5 h-5"></i> Timetable</button>
+                <button onclick="navigate('attend')" id="nav-attend" class="sidebar-link w-full flex items-center gap-4 p-4 rounded-2xl transition"><i data-lucide="user-check" class="w-5 h-5"></i> Attendance</button>
+                <button onclick="navigate('assign')" id="nav-assign" class="sidebar-link w-full flex items-center gap-4 p-4 rounded-2xl transition"><i data-lucide="file-text" class="w-5 h-5"></i> Assignments</button>
+                <button onclick="navigate('notes')" id="nav-notes" class="sidebar-link w-full flex items-center gap-4 p-4 rounded-2xl transition"><i data-lucide="book-open" class="w-5 h-5"></i> Study Vault</button>
+            </nav>
+            <button onclick="logout()" class="p-4 text-red-500 font-bold flex items-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
+        </aside>
+
+        <main class="flex-1 flex flex-col p-8 overflow-hidden">
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h1 id="header-title" class="text-3xl font-black text-white tracking-tight">Dashboard</h1>
+                    <p id="header-date" class="text-slate-500 font-medium text-sm"></p>
+                </div>
+                <div onclick="openProfile()" class="cursor-pointer hover:scale-105 transition">
+                    <div class="w-14 h-14 rounded-2xl glass border border-white/10 p-1">
+                        <img id="avatar-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-full h-full object-cover rounded-xl">
+                    </div>
+                </div>
+            </header>
+
+            <div id="view-container" class="flex-1 overflow-y-auto">
+                <div id="view-dash" class="view hidden"><div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"><div class="glass p-6 rounded-3xl border-l-4 border-blue-500"><p class="text-slate-500 text-[10px] font-bold uppercase mb-2">Tasks</p><h2 id="dash-assign-count" class="text-3xl font-black text-white">0</h2></div><div class="glass p-6 rounded-3xl border-l-4 border-green-500"><p class="text-slate-500 text-[10px] font-bold uppercase mb-2">Attendance</p><h2 id="dash-avg-attend" class="text-3xl font-black text-white">0%</h2></div></div><div class="glass p-8 rounded-[2rem]"><h3 class="text-xl font-bold mb-4 text-white">Recent Activity</h3><div id="dash-focus-list" class="space-y-3"></div></div></div>
+                <div id="view-time" class="view hidden"><div class="grid grid-cols-7 gap-4" id="timetable-grid"><div class="text-center p-2 text-slate-500 font-bold text-[10px] uppercase">Slot</div><div class="text-center p-2 text-slate-500 font-bold text-[10px] uppercase">Mon</div><div class="text-center p-2 text-slate-500 font-bold text-[10px] uppercase">Tue</div><div class="text-center p-2 text-slate-500 font-bold text-[10px] uppercase">Wed</div><div class="text-center p-2 text-slate-500 font-bold text-[10px] uppercase">Thu</div><div class="text-center p-2 text-slate-500 font-bold text-[10px] uppercase">Fri</div><div class="text-center p-2 text-slate-500 font-bold text-[10px] uppercase">Sat</div></div></div>
+                <div id="view-attend" class="view hidden"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="attend-grid"></div></div>
+                <div id="view-assign" class="view hidden"><div class="flex justify-between mb-8"><input type="text" id="as-search" oninput="renderAssignments()" placeholder="Search..." class="bg-white/5 border border-white/10 p-4 rounded-2xl w-full max-w-sm text-white outline-none"><button onclick="openModal('assign-modal')" class="bg-blue-600 px-8 py-4 rounded-2xl font-bold">+ Add Task</button></div><div class="glass rounded-3xl p-6 space-y-2" id="assign-list"></div></div>
+                <div id="view-notes" class="view hidden"><div class="flex justify-between mb-8"><input type="text" id="nt-search" oninput="renderNotes()" placeholder="Search vault..." class="bg-white/5 border border-white/10 p-4 rounded-2xl w-full max-w-sm text-white outline-none"><button onclick="openModal('note-modal')" class="bg-indigo-600 px-8 py-4 rounded-2xl font-bold">New Note</button></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="notes-grid"></div></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-overlay" class="fixed inset-0 bg-black/95 backdrop-blur-xl hidden z-[200] flex items-center justify-center p-6">
+        <div id="profile-modal" class="glass p-10 rounded-[3rem] w-full max-w-lg hidden">
+            <div class="text-center mb-8">
+                <div class="relative w-24 h-24 mx-auto mb-4 group cursor-pointer" onclick="document.getElementById('img-up').click()">
+                    <img id="p-img" src="" class="w-full h-full object-cover rounded-3xl border-2 border-blue-500">
+                    <input type="file" id="img-up" class="hidden" onchange="startCrop(event)">
+                </div>
+                <h3 id="p-name" class="text-2xl font-bold text-white">---</h3>
+                <p id="p-email" class="text-blue-400 text-sm">---</p>
+            </div>
+            <div id="p-details" class="grid grid-cols-2 gap-y-6 gap-x-4 border-t border-white/10 pt-8 text-[11px]"></div>
+            <button onclick="closeModal()" class="w-full mt-10 bg-white/5 py-4 rounded-2xl font-bold text-slate-500">Close</button>
+        </div>
+        <div id="crop-modal" class="glass p-8 rounded-[3rem] w-full max-w-2xl hidden text-center">
+            <div class="max-h-[400px] overflow-hidden rounded-2xl mb-6"><img id="crop-target" class="max-w-full"></div>
+            <button onclick="finishCrop()" class="bg-blue-600 px-10 py-4 rounded-2xl font-bold">Crop & Save</button>
+        </div>
+        <div id="assign-modal" class="glass p-8 rounded-[2rem] w-full max-w-md hidden space-y-4">
+            <input type="text" id="as-t" placeholder="Task Title" class="w-full bg-white/5 p-4 rounded-xl text-white outline-none">
+            <input type="date" id="as-d" class="w-full bg-white/5 p-4 rounded-xl text-white outline-none">
+            <button onclick="saveAssignment()" class="w-full bg-blue-600 py-4 rounded-xl font-bold">Save</button>
+        </div>
+        <div id="note-modal" class="glass p-8 rounded-[2rem] w-full max-w-md hidden space-y-4">
+            <input type="text" id="nt-t" placeholder="Topic" class="w-full bg-white/5 p-4 rounded-xl text-white outline-none">
+            <textarea id="nt-b" placeholder="Content" class="w-full bg-white/5 p-4 rounded-xl h-32 text-white outline-none"></textarea>
+            <button onclick="saveNote()" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">Save</button>
+        </div>
+    </div>
+
+    <script>
+        let users = JSON.parse(localStorage.getItem('lxU')) || {};
+        let current = JSON.parse(localStorage.getItem('lxC')) || null;
+        let assign = JSON.parse(localStorage.getItem('lxA')) || [];
+        let notes = JSON.parse(localStorage.getItem('lxN')) || [];
+        let attend = JSON.parse(localStorage.getItem('lxAt')) || [
+            { sub: 'AI', got: 0, tot: 0 }, { sub: 'UI/UX', got: 0, tot: 0 }, { sub: 'CC', got: 0, tot: 0 }, { sub: 'WT', got: 0, tot: 0 }, { sub: 'DSA', got: 0, tot: 0 }
+        ];
+        let cropper = null;
+
+        function toggleAuth(isL) {
+            document.getElementById('login-box').classList.toggle('hidden', !isL);
+            document.getElementById('reg-box').classList.toggle('hidden', isL);
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            users[email] = {
+                name: document.getElementById('reg-name').value, email: email, pass: document.getElementById('reg-pass').value,
+                dob: document.getElementById('reg-dob').value, mobile: document.getElementById('reg-mobile').value,
+                course: document.getElementById('reg-course').value, college: document.getElementById('reg-college').value,
+                year: document.getElementById('reg-year').value, passYear: document.getElementById('reg-passyear').value, pic: null
+            };
+            localStorage.setItem('lxU', JSON.stringify(users));
+            alert("Enrollment Successful!"); toggleAuth(true);
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = users[document.getElementById('log-email').value];
+            if (u && u.pass === document.getElementById('log-pass').value) {
+                current = u; localStorage.setItem('lxC', JSON.stringify(u)); initApp();
+            } else alert("Invalid ID or Password.");
+        }
+
+        function navigate(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(`view-${view}`).classList.remove('hidden');
+            document.getElementById(`nav-${view}`).classList.add('active');
+            document.getElementById('header-title').innerText = view.toUpperCase();
+            if(view === 'dash') renderDash();
+            if(view === 'time') renderTime();
+            if(view === 'attend') renderAttend();
+            if(view === 'assign') renderAssignments();
+            if(view === 'notes') renderNotes();
+            lucide.createIcons();
+        }
+
+        function openProfile() {
+            document.getElementById('p-name').innerText = current.name;
+            document.getElementById('p-email').innerText = current.email;
+            document.getElementById('p-img').src = current.pic || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix';
+            document.getElementById('p-details').innerHTML = `
+                <div><p class="text-slate-500 font-bold uppercase">DOB</p><p class="text-white">${current.dob}</p></div>
+                <div><p class="text-slate-500 font-bold uppercase">Mobile</p><p class="text-white">${current.mobile}</p></div>
+                <div><p class="text-slate-500 font-bold uppercase">Course</p><p class="text-white">${current.course}</p></div>
+                <div><p class="text-slate-500 font-bold uppercase">College</p><p class="text-white">${current.college}</p></div>
+                <div><p class="text-slate-500 font-bold uppercase">Academic Year</p><p class="text-white">${current.year}</p></div>
+                <div><p class="text-slate-500 font-bold uppercase">Passing Year</p><p class="text-white">${current.passYear}</p></div>
+            `;
+            openModal('profile-modal');
+        }
+
+        function renderTime() {
+            const grid = document.getElementById('timetable-grid');
+            const slots = ['09:00', '10:00', '11:00', '12:00', '01:00', '02:00'];
+            const subjects = ['AI', 'UI/UX', 'CC', 'WT', 'DSA', 'Lab'];
+            while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+            slots.forEach((time, i) => {
+                grid.innerHTML += `<div class="p-4 border-b border-white/5 text-[10px] font-black text-blue-500">${time}</div>`;
+                for(let day=0; day<6; day++) {
+                    const isB = time === '12:00';
+                    grid.innerHTML += `<div class="p-1"><div class="${isB ? 'bg-white/5' : 'subject-pill'} rounded-xl p-3 text-center text-[10px] font-bold ${isB ? 'text-slate-600' : 'text-white'}">${isB ? 'Break' : subjects[(i+day)%subjects.length]}</div></div>`;
+                }
+            });
+        }
+
+        function renderAttend() {
+            document.getElementById('attend-grid').innerHTML = attend.map((a, i) => {
+                const p = a.tot === 0 ? 0 : Math.round((a.got/a.tot)*100);
+                return `<div class="glass p-8 rounded-[2.5rem] text-center"><div class="text-[10px] font-black text-slate-500 uppercase mb-2">${a.sub}</div><div class="text-4xl font-black ${p < 75 ? 'text-red-500' : 'text-blue-500'} mb-6">${p}%</div><div class="flex gap-2 justify-center"><button onclick="mark(${i}, true)" class="bg-blue-600/20 text-blue-400 px-6 py-2 rounded-xl">P</button><button onclick="mark(${i}, false)" class="bg-white/5 text-slate-500 px-6 py-2 rounded-xl">A</button></div></div>`;
+            }).join('');
+        }
+
+        function mark(idx, p) { attend[idx].tot++; if(p) attend[idx].got++; localStorage.setItem('lxAt', JSON.stringify(attend)); renderAttend(); }
+        function saveAssignment() { assign.push({ title: document.getElementById('as-t').value, date: document.getElementById('as-d').value }); localStorage.setItem('lxA', JSON.stringify(assign)); closeModal(); navigate('assign'); }
+        function saveNote() { notes.push({ title: document.getElementById('nt-t').value, body: document.getElementById('nt-b').value }); localStorage.setItem('lxN', JSON.stringify(notes)); closeModal(); navigate('notes'); }
+        function renderDash() { document.getElementById('dash-assign-count').innerText = assign.length; const tT = attend.reduce((a,c) => a+c.tot, 0); const tG = attend.reduce((a,c) => a+c.got, 0); document.getElementById('dash-avg-attend').innerText = tT === 0 ? "0%" : Math.round((tG/tT)*100) + "%"; }
+        function renderAssignments() { const q = document.getElementById('as-search').value.toLowerCase(); document.getElementById('assign-list').innerHTML = assign.filter(a => a.title.toLowerCase().includes(q)).map(a => `<div class="p-4 bg-white/5 rounded-2xl flex justify-between font-bold"><span>${a.title}</span><span class="text-xs text-slate-500">${a.date}</span></div>`).join(''); }
+        function renderNotes() { const q = document.getElementById('nt-search').value.toLowerCase(); document.getElementById('notes-grid').innerHTML = notes.filter(n => n.title.toLowerCase().includes(q)).map(n => `<div class="glass p-6 rounded-2xl"><h4 class="font-bold mb-2">${n.title}</h4><p class="text-xs text-slate-500">${n.body}</p></div>`).join(''); }
+        
+        function startCrop(e) {
+            const r = new FileReader(); r.onload = (ev) => { document.getElementById('crop-target').src = ev.target.result; openModal('crop-modal'); if(cropper) cropper.destroy(); setTimeout(() => { cropper = new Cropper(document.getElementById('crop-target'), { aspectRatio: 1 }); }, 100); }; r.readAsDataURL(e.target.files[0]);
+        }
+        function finishCrop() { const d = cropper.getCroppedCanvas().toDataURL(); current.pic = d; users[current.email].pic = d; localStorage.setItem('lxC', JSON.stringify(current)); localStorage.setItem('lxU', JSON.stringify(users)); document.getElementById('avatar-img').src = d; document.getElementById('p-img').src = d; closeModal(); }
+
+        function initApp() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('header-date').innerText = new Date().toDateString();
+            if(current.pic) document.getElementById('avatar-img').src = current.pic;
+            navigate('dash');
+        }
+        function openModal(id) { document.getElementById('modal-overlay').classList.remove('hidden'); document.getElementById(id).classList.remove('hidden'); }
+        function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); document.querySelectorAll('#modal-overlay > div').forEach(d => d.classList.add('hidden')); }
+        function logout() { localStorage.removeItem('lxC'); location.reload(); }
+        window.onload = () => { if(current) initApp(); lucide.createIcons(); };
+    </script>
+</body>
+</html>
